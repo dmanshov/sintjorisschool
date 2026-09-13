@@ -112,9 +112,14 @@ environment variables from `.env.example`, and point `DATABASE_URL` at Neon's
 This site belongs in **its own Neon project**, not a second database inside a
 project shared with another application — databases in one project share the
 compute endpoint, the Postgres roles, the branch and the PITR window, so one
-leaked credential reaches both. `docs/MIGRATION.md` covers the setup, and every
-script refuses to run against a database that is not this project's (see
-`EXPECTED_DATABASE_NAME`).
+leaked credential reaches both. `docs/MIGRATION.md` covers the setup.
+
+Every script refuses to run against anything but this project's own database. It
+prints the host, database and role it is about to touch, then checks the database
+name (`EXPECTED_DATABASE_NAME`), that the schema holds only our tables, and — once
+you set it — that the endpoint host matches `EXPECTED_DATABASE_HOST`. Set that pin
+as soon as the Neon project exists: it is what makes "this project and no other"
+categorical rather than name-based.
 
 Set `DATABASE_URL_UNPOOLED` to the direct connection string as well — migrations
 and the import scripts use it, because DDL and bulk loads do not belong on a

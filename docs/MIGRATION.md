@@ -96,6 +96,27 @@ Put both connection strings from the **new** project in `.env.local`:
 Double-check the hostname. It must be the new project's `ep-…`, not the other
 application's.
 
+### Keeping it separate from everything else on the account
+
+Separation is not only a Neon-console decision; it has to survive every later
+copy-paste and every deploy. Three places can quietly reconnect the two:
+
+- **A pasted connection string.** Covered by the guardrail below.
+- **Vercel shared environment variables.** A `DATABASE_URL` set at the *team* or
+  *shared* level is inherited by new projects. If another application defined one
+  there, this deployment picks it up without anyone choosing it. Set
+  `DATABASE_URL` explicitly on this project and check that nothing shared is
+  overriding it.
+- **Vercel's Neon integration.** Linking a Neon project from the integrations tab
+  auto-injects `DATABASE_URL`. Link the school's project, or none at all and set
+  the variables by hand.
+
+After the first deploy, confirm what is actually in use rather than assuming:
+
+```bash
+npm run migrate:verify        # prints host, database and role before doing anything
+```
+
 ### The guardrail, and why it exists
 
 Every script in `scripts/` calls `assertTargetDatabase` before doing anything. It
@@ -103,7 +124,21 @@ prints the host, database and role it is about to touch, then refuses unless:
 
 1. `current_database()` equals `EXPECTED_DATABASE_NAME` (default
    `sintjorisschool`), and
-2. the `public` schema contains only this project's tables.
+2. the `public` schema contains only this project's tables, and
+3. the connection host equals `EXPECTED_DATABASE_HOST`, when that is set.
+
+**Set the host pin as soon as the Neon project exists.** Checks 1 and 2 enforce
+separation only as long as no other project reuses the name — and an *empty*
+database called `sintjorisschool` in the wrong project would pass both. The host
+pin is what makes it categorical: a different endpoint is a different Neon
+project, full stop.
+
+```dotenv
+EXPECTED_DATABASE_HOST="ep-xxx.eu-central-1.aws.neon.tech"
+```
+
+Hostname only, copied out of `DATABASE_URL_UNPOOLED` — no protocol, no port, no
+database name.
 
 This is not paperwork. Five of our tables are called `users`, `posts`, `orders`,
 `content` and `sessions` — the names almost any other application would also use.
@@ -116,6 +151,7 @@ Target database
   host      ep-xxx.eu-central-1.aws.neon.tech
   database  sintjorisschool
   role      sintjorisschool_owner
+  pin       ok (host matches EXPECTED_DATABASE_HOST)
   check     ok (0 table(s), all belonging to this project)
 ```
 

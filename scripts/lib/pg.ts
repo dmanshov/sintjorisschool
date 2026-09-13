@@ -56,6 +56,7 @@ const OWNED_TABLES = new Set([
  */
 export async function assertTargetDatabase(client: Client, url: string): Promise<void> {
   const expected = process.env.EXPECTED_DATABASE_NAME ?? 'sintjorisschool';
+  const expectedHost = process.env.EXPECTED_DATABASE_HOST;
   const override = process.argv.includes('--allow-any-database');
 
   const { rows } = await client.query<{ database: string; role: string }>(
@@ -74,6 +75,34 @@ export async function assertTargetDatabase(client: Client, url: string): Promise
   // Always say out loud what is about to be touched. A migration that silently
   // picks its target is a migration that eventually picks the wrong one.
   console.log(`\nTarget database\n  host      ${host}\n  database  ${database}\n  role      ${role}`);
+
+  /**
+   * Host pin. The database-name check alone only guarantees separation *within*
+   * an account if no other project happens to use the same name — and an empty
+   * database of the right name would sail past the foreign-table check below
+   * too. Pinning the endpoint hostname is what actually enforces "this Neon
+   * project and no other": set EXPECTED_DATABASE_HOST to the new project's
+   * `ep-…` host once and no other endpoint can ever be written to.
+   */
+  if (expectedHost && !override) {
+    if (host !== expectedHost) {
+      throw new Error(
+        `Refusing to continue: connected to host "${host}", but EXPECTED_DATABASE_HOST\n` +
+          `is pinned to "${expectedHost}".\n\n` +
+          'This is the check that enforces "the school\'s own Neon project, not any\n' +
+          'other one on this account". A different endpoint means a different project,\n' +
+          'even if the database inside it happens to share a name.\n\n' +
+          'Fix DATABASE_URL / DATABASE_URL_UNPOOLED in .env.local, or update the pin if\n' +
+          'the project has genuinely moved.',
+      );
+    }
+    console.log(`  pin       ok (host matches EXPECTED_DATABASE_HOST)`);
+  } else if (!expectedHost && !override) {
+    console.log(
+      '  pin       not set — set EXPECTED_DATABASE_HOST to this project\'s endpoint host\n' +
+        '            to refuse every other Neon project outright',
+    );
+  }
 
   const tables = await client.query<{ tablename: string }>(
     "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename",
