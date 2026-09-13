@@ -60,11 +60,73 @@ mkdir -p migration-data          # gitignored; everything sensitive goes here
 cp .env.example .env.local
 ```
 
-Create a Neon project (region `eu-central-1`, closest to Belgium) and put both
-connection strings in `.env.local`:
+### Create a separate Neon project
+
+**A new project, not a new database inside an existing one.** If this account
+already hosts another application, that distinction is the whole point.
+
+Neon's hierarchy is organization → **project** → branch → database. Two databases
+in one project still share:
+
+- the same compute endpoint and hostname
+- the same Postgres **roles** — so one leaked credential reaches both
+- the same branch, so a branch reset or point-in-time restore for the other
+  application rewinds this one too
+- the same scale-to-zero compute, storage quota and PITR window
+
+For data about minors, that shared credential surface is not an acceptable
+boundary. A separate project gives independent endpoints, roles, branches, PITR
+and a separate line on the bill.
+
+> Neon console → **New project**
+> - Name: `sintjorisschool`
+> - Region: `eu-central-1` (Frankfurt) — closest to Belgium
+> - Database name: `sintjorisschool`
+
+Check your plan's project limit first; if you are on a plan that allows only one
+project, the fallback is a separate database *plus* a dedicated role with
+`CONNECT` revoked on the other database. That is weaker — same compute, same
+branch lineage — so treat it as temporary.
+
+Put both connection strings from the **new** project in `.env.local`:
 
 - `DATABASE_URL` — the **pooled** string (host contains `-pooler`). The app uses it.
 - `DATABASE_URL_UNPOOLED` — the direct string. Migrations and imports use it.
+
+Double-check the hostname. It must be the new project's `ep-…`, not the other
+application's.
+
+### The guardrail, and why it exists
+
+Every script in `scripts/` calls `assertTargetDatabase` before doing anything. It
+prints the host, database and role it is about to touch, then refuses unless:
+
+1. `current_database()` equals `EXPECTED_DATABASE_NAME` (default
+   `sintjorisschool`), and
+2. the `public` schema contains only this project's tables.
+
+This is not paperwork. Five of our tables are called `users`, `posts`, `orders`,
+`content` and `sessions` — the names almost any other application would also use.
+A connection string pasted from the wrong Neon project would collide on some
+tables and silently create the rest, scattering a school's schema through an
+unrelated database. So it is checked up front instead of discovered later:
+
+```
+Target database
+  host      ep-xxx.eu-central-1.aws.neon.tech
+  database  sintjorisschool
+  role      sintjorisschool_owner
+  check     ok (0 table(s), all belonging to this project)
+```
+
+If you see a refusal, fix `DATABASE_URL` rather than reaching for
+`--allow-any-database`. The override exists only for the case where the school's
+database legitimately has a different name, and `EXPECTED_DATABASE_NAME` is the
+better answer even then.
+
+`drizzle-kit push` is deliberately **not** wired up as an npm script: it writes
+DDL straight from `db/schema.ts` to whatever `DATABASE_URL` says, with no such
+check. Use `npm run db:apply`.
 
 Generate the session secret:
 

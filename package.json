@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/*.test.ts",
     "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
     "db:apply": "tsx scripts/apply-migrations.ts",
     "db:studio": "drizzle-kit studio",
     "migrate:firestore": "tsx scripts/migrate-firestore.ts",

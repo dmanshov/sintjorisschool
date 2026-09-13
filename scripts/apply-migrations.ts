@@ -7,17 +7,15 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { Client } from 'pg';
-import './load-env';
+import { connect } from './lib/pg';
 
 const MIGRATIONS_DIR = path.join(process.cwd(), 'db', 'migrations');
 
 async function main() {
-  const url = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
-  if (!url) throw new Error('DATABASE_URL_UNPOOLED or DATABASE_URL must be set.');
-
-  const client = new Client({ connectionString: url });
-  await client.connect();
+  // connect() refuses to proceed unless this is the school's own database. Our
+  // table names are generic enough that running these migrations against another
+  // project's database would otherwise half-succeed.
+  const client = await connect();
 
   await client.query(`
     CREATE TABLE IF NOT EXISTS _migrations (
@@ -65,6 +63,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error);
+  console.error(`\n${error instanceof Error ? error.message : error}`);
   process.exit(1);
 });

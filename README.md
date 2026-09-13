@@ -58,7 +58,7 @@ The demo seed creates three accounts, all with password `DemoWachtwoord123`:
 | `npm run typecheck` | TypeScript, no emit |
 | `npm test` | Unit tests, plus integration tests when `DATABASE_URL` is set |
 | `npm run db:generate` | Regenerate SQL from `db/schema.ts` after a schema change |
-| `npm run db:apply` | Apply pending migrations from `db/migrations` |
+| `npm run db:apply` | Apply pending migrations from `db/migrations` (checks it is the right database first) |
 | `npm run db:studio` | Drizzle Studio, to browse the database |
 | `npm run seed:demo` | Local demo data (`-- --clean` removes it) |
 | `npm run admin:grant -- <email>` | Make someone an administrator (`-- --revoke` undoes it) |
@@ -108,6 +108,13 @@ the school's address, phone numbers and teacher mailboxes live in
 Any host that runs Next.js works. On Vercel: connect the repository, set the
 environment variables from `.env.example`, and point `DATABASE_URL` at Neon's
 **pooled** connection string (the one with `-pooler` in the host).
+
+This site belongs in **its own Neon project**, not a second database inside a
+project shared with another application — databases in one project share the
+compute endpoint, the Postgres roles, the branch and the PITR window, so one
+leaked credential reaches both. `docs/MIGRATION.md` covers the setup, and every
+script refuses to run against a database that is not this project's (see
+`EXPECTED_DATABASE_NAME`).
 
 Set `DATABASE_URL_UNPOOLED` to the direct connection string as well — migrations
 and the import scripts use it, because DDL and bulk loads do not belong on a
