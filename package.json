@@ -1,0 +1,53 @@
+{
+  "name": "sintjorisschool",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Sint-Jorisschool Tielt-Winge \u2014 website and parent portal. Next.js + Neon Postgres.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:apply": "tsx scripts/apply-migrations.ts",
+    "db:studio": "drizzle-kit studio",
+    "migrate:firestore": "tsx scripts/migrate-firestore.ts",
+    "migrate:auth": "tsx scripts/migrate-auth.ts",
+    "migrate:storage": "tsx scripts/migrate-storage.ts",
+    "migrate:verify": "tsx scripts/verify-migration.ts",
+    "auth:probe": "tsx scripts/probe-firebase-password.ts",
+    "admin:grant": "tsx scripts/grant-admin.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.758.0",
+    "@aws-sdk/s3-request-presigner": "3.758.0",
+    "@neondatabase/serverless": "1.1.0",
+    "@types/pg": "8.11.11",
+    "dotenv": "16.4.7",
+    "drizzle-orm": "0.45.2",
+    "next": "16.3.5",
+    "nodemailer": "6.10.0",
+    "pg": "8.13.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "ws": "8.18.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.0.9",
+    "@types/node": "22.13.5",
+    "@types/nodemailer": "6.4.17",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "drizzle-kit": "0.31.1",
+    "firebase-admin": "13.1.0",
+    "tailwindcss": "4.0.9",
+    "tsx": "4.19.3",
+    "typescript": "5.7.3"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}

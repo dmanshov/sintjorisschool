@@ -1,0 +1,1318 @@
+{
+  "id": "d549ceb9-ba29-45c3-8142-917db422e0fc",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.child_parents": {
+      "name": "child_parents",
+      "schema": "",
+      "columns": {
+        "child_id": {
+          "name": "child_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "child_parents_user_idx": {
+          "name": "child_parents_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "child_parents_child_id_children_id_fk": {
+          "name": "child_parents_child_id_children_id_fk",
+          "tableFrom": "child_parents",
+          "tableTo": "children",
+          "columnsFrom": [
+            "child_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "child_parents_user_id_users_id_fk": {
+          "name": "child_parents_user_id_users_id_fk",
+          "tableFrom": "child_parents",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "child_parents_child_id_user_id_pk": {
+          "name": "child_parents_child_id_user_id_pk",
+          "columns": [
+            "child_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.children": {
+      "name": "children",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "surname": {
+          "name": "surname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "classroom": {
+          "name": "classroom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "children_classroom_idx": {
+          "name": "children_classroom_idx",
+          "columns": [
+            {
+              "expression": "classroom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "children_classroom_valid": {
+          "name": "children_classroom_valid",
+          "value": "\"children\".\"classroom\" = ANY (ARRAY['KK0','KK1','KK2','KK3','L1','L2A','L2B','L3','L4','L5A','L5B','L6'])"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.content": {
+      "name": "content",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "'singleton'"
+        },
+        "maaltijd": {
+          "name": "maaltijd",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "maaltijd_datums": {
+          "name": "maaltijd_datums",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "maaltijd_maand": {
+          "name": "maaltijd_maand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "maaltijd_bericht": {
+          "name": "maaltijd_bericht",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inschrijvingen": {
+          "name": "inschrijvingen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "welkom": {
+          "name": "welkom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schoolreglement": {
+          "name": "schoolreglement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_foto": {
+          "name": "team_foto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_directeur": {
+          "name": "team_directeur",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_administratie": {
+          "name": "team_administratie",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_kleuterschool": {
+          "name": "team_kleuterschool",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_lagere_school": {
+          "name": "team_lagere_school",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_ambulant": {
+          "name": "team_ambulant",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_zorg": {
+          "name": "team_zorg",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_gym": {
+          "name": "team_gym",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_onderhoud": {
+          "name": "team_onderhoud",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_kk0": {
+          "name": "benodigdheden_kk0",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_kk1": {
+          "name": "benodigdheden_kk1",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_kk2": {
+          "name": "benodigdheden_kk2",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_kk3": {
+          "name": "benodigdheden_kk3",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_l1": {
+          "name": "benodigdheden_l1",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_l2": {
+          "name": "benodigdheden_l2",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_l3": {
+          "name": "benodigdheden_l3",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_l4": {
+          "name": "benodigdheden_l4",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_l5": {
+          "name": "benodigdheden_l5",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "benodigdheden_l6": {
+          "name": "benodigdheden_l6",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bestuur_voorzitter": {
+          "name": "bestuur_voorzitter",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bestuur_leden": {
+          "name": "bestuur_leden",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ondersteuning_vestiging": {
+          "name": "ondersteuning_vestiging",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ondersteuning_voorwaarden": {
+          "name": "ondersteuning_voorwaarden",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ziekte": {
+          "name": "ziekte",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "opvang": {
+          "name": "opvang",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "clb_coordinator": {
+          "name": "clb_coordinator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "clb_medewerkers": {
+          "name": "clb_medewerkers",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_by_id": {
+          "name": "updated_by_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "content_updated_by_id_users_id_fk": {
+          "name": "content_updated_by_id_users_id_fk",
+          "tableFrom": "content",
+          "tableTo": "users",
+          "columnsFrom": [
+            "updated_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.login_attempts": {
+      "name": "login_attempts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "bucket": {
+          "name": "bucket",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempted_at": {
+          "name": "attempted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "succeeded": {
+          "name": "succeeded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "login_attempts_bucket_idx": {
+          "name": "login_attempts_bucket_idx",
+          "columns": [
+            {
+              "expression": "bucket",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "attempted_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.orders": {
+      "name": "orders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "order_type": {
+          "name": "order_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Besteld'"
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "created_by_id": {
+          "name": "created_by_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_for_id": {
+          "name": "created_for_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by_name": {
+          "name": "created_by_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by_surname": {
+          "name": "created_by_surname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by_email": {
+          "name": "created_by_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_for_name": {
+          "name": "created_for_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_for_surname": {
+          "name": "created_for_surname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_for_classroom": {
+          "name": "created_for_classroom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "size": {
+          "name": "size",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consumption_month": {
+          "name": "consumption_month",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consumption_dates": {
+          "name": "consumption_dates",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "orders_type_status_idx": {
+          "name": "orders_type_status_idx",
+          "columns": [
+            {
+              "expression": "order_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orders_created_by_idx": {
+          "name": "orders_created_by_idx",
+          "columns": [
+            {
+              "expression": "created_by_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orders_created_for_idx": {
+          "name": "orders_created_for_idx",
+          "columns": [
+            {
+              "expression": "created_for_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orders_classroom_idx": {
+          "name": "orders_classroom_idx",
+          "columns": [
+            {
+              "expression": "created_for_classroom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "orders_month_idx": {
+          "name": "orders_month_idx",
+          "columns": [
+            {
+              "expression": "consumption_month",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "orders_created_by_id_users_id_fk": {
+          "name": "orders_created_by_id_users_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "orders_created_for_id_children_id_fk": {
+          "name": "orders_created_for_id_children_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "children",
+          "columnsFrom": [
+            "created_for_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "orders_type_valid": {
+          "name": "orders_type_valid",
+          "value": "\"orders\".\"order_type\" = ANY (ARRAY['Drankkaart','Badmuts','Gym T-shirt','Maaltijd'])"
+        },
+        "orders_status_valid": {
+          "name": "orders_status_valid",
+          "value": "\"orders\".\"status\" = ANY (ARRAY['Besteld','Uitgedeeld','Gefactureerd'])"
+        },
+        "orders_quantity_positive": {
+          "name": "orders_quantity_positive",
+          "value": "\"orders\".\"quantity\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.password_reset_tokens": {
+      "name": "password_reset_tokens",
+      "schema": "",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "used_at": {
+          "name": "used_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "prt_user_idx": {
+          "name": "prt_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "prt_expires_idx": {
+          "name": "prt_expires_idx",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "password_reset_tokens_user_id_users_id_fk": {
+          "name": "password_reset_tokens_user_id_users_id_fk",
+          "tableFrom": "password_reset_tokens",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.post_likes": {
+      "name": "post_likes",
+      "schema": "",
+      "columns": {
+        "post_id": {
+          "name": "post_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "post_likes_user_idx": {
+          "name": "post_likes_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "post_likes_post_id_posts_id_fk": {
+          "name": "post_likes_post_id_posts_id_fk",
+          "tableFrom": "post_likes",
+          "tableTo": "posts",
+          "columnsFrom": [
+            "post_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "post_likes_user_id_users_id_fk": {
+          "name": "post_likes_user_id_users_id_fk",
+          "tableFrom": "post_likes",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "post_likes_post_id_user_id_pk": {
+          "name": "post_likes_post_id_user_id_pk",
+          "columns": [
+            "post_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.posts": {
+      "name": "posts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "post_title": {
+          "name": "post_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "post_description": {
+          "name": "post_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "post_photo": {
+          "name": "post_photo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "album_url": {
+          "name": "album_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "external_url": {
+          "name": "external_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "classroom": {
+          "name": "classroom",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "pinned": {
+          "name": "pinned",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "post_user_id": {
+          "name": "post_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "time_posted": {
+          "name": "time_posted",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "posts_time_posted_idx": {
+          "name": "posts_time_posted_idx",
+          "columns": [
+            {
+              "expression": "time_posted",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "posts_pinned_time_idx": {
+          "name": "posts_pinned_time_idx",
+          "columns": [
+            {
+              "expression": "pinned",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "time_posted",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "posts_classroom_gin_idx": {
+          "name": "posts_classroom_gin_idx",
+          "columns": [
+            {
+              "expression": "classroom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "posts_post_user_id_users_id_fk": {
+          "name": "posts_post_user_id_users_id_fk",
+          "tableFrom": "posts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "post_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "sessions_user_idx": {
+          "name": "sessions_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sessions_expires_idx": {
+          "name": "sessions_expires_idx",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "surname": {
+          "name": "surname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "photo_url": {
+          "name": "photo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "admin": {
+          "name": "admin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "teacher": {
+          "name": "teacher",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "teacher_classroom": {
+          "name": "teacher_classroom",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "legacy_firebase_hash": {
+          "name": "legacy_firebase_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "legacy_firebase_salt": {
+          "name": "legacy_firebase_salt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "disabled": {
+          "name": "disabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_time": {
+          "name": "created_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_login_at": {
+          "name": "last_login_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "users_email_lower_idx": {
+          "name": "users_email_lower_idx",
+          "columns": [
+            {
+              "expression": "lower(\"email\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "users_admin_idx": {
+          "name": "users_admin_idx",
+          "columns": [
+            {
+              "expression": "admin",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"users\".\"admin\"",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "users_teacher_idx": {
+          "name": "users_teacher_idx",
+          "columns": [
+            {
+              "expression": "teacher",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"users\".\"teacher\"",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

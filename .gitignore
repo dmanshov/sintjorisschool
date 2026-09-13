@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets and migration payloads — these contain password hashes and personal data.
+.env
+.env.local
+.env*.local
+/migration-data/
+*.firebase-users.json
+serviceAccount*.json
+.DS_Store

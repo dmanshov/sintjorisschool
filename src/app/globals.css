@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+
+/*
+ * The palette and type scale are lifted from the FlutterFlow theme
+ * (lib/flutter_flow/flutter_flow_theme.dart) so the rebuilt site reads as the
+ * same school, not a different one.
+ */
+@theme {
+  --color-primary: #54363c;
+  --color-primary-soft: #6d4a51;
+  --color-secondary: #7e812e;
+  --color-tertiary: #709848;
+  --color-alternate: #84a59e;
+
+  --color-ink: #14181b;
+  --color-ink-muted: #57636c;
+  --color-surface: #ffffff;
+  --color-canvas: #f1f4f8;
+  --color-line: #e3e8ef;
+
+  --color-success: #709848;
+  --color-warning: #f9cf58;
+  --color-danger: #ff5963;
+
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-readex), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 14px;
+  --shadow-card: 0 2px 10px 0 rgb(0 0 0 / 0.08);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-primary);
+    text-wrap: balance;
+  }
+
+  /* Visible focus everywhere. The Flutter canvas gave keyboard users nothing. */
+  :focus-visible {
+    outline: 3px solid var(--color-secondary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .card {
+    background-color: var(--color-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Long CMS text is stored with newlines, not HTML. Render it as typed. */
+  .prose-cms {
+    white-space: pre-line;
+    line-height: 1.65;
+  }
+}
