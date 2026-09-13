@@ -1,24 +1,26 @@
 import type { MetadataRoute } from 'next';
+import { getSiteOrigin } from '@/lib/site-url';
+
+/**
+ * Evaluated per request, not at build time.
+ *
+ * Otherwise the staging lock's disallow-all would be baked in at build and go
+ * stale: turning SITE_ACCESS_CODE on or off would not change robots.txt until
+ * the next deploy, which is exactly when you least want a stale answer. It also
+ * lets the base URL be read from the request rather than fixed at build time.
+ */
+export const dynamic = 'force-dynamic';
 
 /**
  * A canvas-rendered Flutter app could not offer this at all. Every public page is
  * listed at its canonical (original) URL, so nothing the school has already shared
  * or that Google has already indexed changes.
  */
-/**
- * Evaluated per request, not at build time.
- *
- * Otherwise the staging lock's disallow-all would be baked in at build and go
- * stale: turning SITE_ACCESS_CODE on or off would not change robots.txt until
- * the next deploy, which is exactly when you least want a stale answer.
- */
-export const dynamic = 'force-dynamic';
-
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // While the staging lock is on there is nothing public to list.
   if (process.env.SITE_ACCESS_CODE) return [];
 
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sintjorisschool.be';
+  const base = await getSiteOrigin();
   const now = new Date();
 
   const paths = [

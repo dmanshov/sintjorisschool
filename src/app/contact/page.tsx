@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { Card, PageHeader, Section } from '@/components/layout';
+import { getSiteOrigin } from '@/lib/site-url';
 import { school, teacherContacts } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -12,30 +13,37 @@ export const metadata: Metadata = {
 /**
  * Local-business structured data. A school with a physical address wants to
  * appear in a map result; the old canvas-rendered build could not say any of this.
+ *
+ * `url` is built from the request (see src/lib/site-url.ts), not a fixed domain,
+ * so this page carries no reference to any particular hostname.
  */
-const structuredData = {
-  '@context': 'https://schema.org',
-  '@type': 'School',
-  name: school.name,
-  description: school.description,
-  telephone: school.phone.tel,
-  email: school.email.general,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: school.address.street,
-    postalCode: school.address.postalCode,
-    addressLocality: school.address.city,
-    addressCountry: 'BE',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: school.coordinates.lat,
-    longitude: school.coordinates.lng,
-  },
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sintjorisschool.be',
-};
+async function buildStructuredData() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'School',
+    name: school.name,
+    description: school.description,
+    telephone: school.phone.tel,
+    email: school.email.general,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: school.address.street,
+      postalCode: school.address.postalCode,
+      addressLocality: school.address.city,
+      addressCountry: 'BE',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: school.coordinates.lat,
+      longitude: school.coordinates.lng,
+    },
+    url: await getSiteOrigin(),
+  };
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const structuredData = await buildStructuredData();
+
   return (
     <>
       <SiteHeader current="/contact" />
@@ -43,7 +51,7 @@ export default function ContactPage() {
       <main id="inhoud">
         <script
           type="application/ld+json"
-          // Static, generated above from our own constants.
+          // Generated above from our own constants plus the current request's origin.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
 

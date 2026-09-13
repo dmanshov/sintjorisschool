@@ -106,9 +106,12 @@ the school's address, phone numbers and teacher mailboxes live in
 ## Deploying
 
 **[`docs/DEPLOY.md`](docs/DEPLOY.md) is the step-by-step version.** Short form:
-push to `main`, which Vercel deploys automatically; set `DATABASE_URL`,
-`SESSION_SECRET` and `NEXT_PUBLIC_SITE_URL` in the Vercel project; then run
-`npm run db:apply` once against the Neon database, or the site comes up empty.
+push to `main`, which Vercel deploys automatically; set `DATABASE_URL` and
+`SESSION_SECRET` in the Vercel project; then run `npm run db:apply` once against
+the Neon database, or the site comes up empty. There is no site-URL variable to
+set — the app reads the address it is being served on from each request, so it
+is correct on a preview URL, the `*.vercel.app` production URL, or a custom
+domain without configuration.
 
 Check `/api/health` after any deploy — it reports whether the database is
 reachable and whether the schema has been applied, without revealing the host.

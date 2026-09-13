@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Outfit, Readex_Pro } from 'next/font/google';
+import { getSiteOrigin } from '@/lib/site-url';
 import { school } from '@/lib/site';
 import './globals.css';
 
@@ -20,32 +21,40 @@ const readex = Readex_Pro({
  * verbatim, because the Facebook and WhatsApp previews the school shares depend
  * on them. Unlike the old build, individual pages can now override them — a
  * canvas-rendered Flutter app served one set of tags for every URL.
+ *
+ * A function rather than a static object so `metadataBase` can be read from the
+ * request (see src/lib/site-url.ts) instead of a hardcoded domain. Next calls
+ * this per request; the cost is one header read, not a fetch.
  */
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sintjorisschool.be'),
-  title: {
-    default: `${school.name} | ${school.tagline}`,
-    template: `%s | ${school.name}`,
-  },
-  description: school.description,
-  applicationName: school.name,
-  openGraph: {
-    type: 'website',
-    locale: 'nl_BE',
-    siteName: school.name,
-    title: `${school.name} | ${school.tagline}`,
+export async function generateMetadata(): Promise<Metadata> {
+  const origin = await getSiteOrigin();
+
+  return {
+    metadataBase: new URL(origin),
+    title: {
+      default: `${school.name} | ${school.tagline}`,
+      template: `%s | ${school.name}`,
+    },
     description: school.description,
-    images: ['/draak_socials.png'],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `${school.name} | ${school.tagline}`,
-    description: school.description,
-    images: ['/draak_socials.png'],
-  },
-  icons: { icon: '/draak_socials.png', apple: '/draak_socials.png' },
-  robots: { index: true, follow: true },
-};
+    applicationName: school.name,
+    openGraph: {
+      type: 'website',
+      locale: 'nl_BE',
+      siteName: school.name,
+      title: `${school.name} | ${school.tagline}`,
+      description: school.description,
+      images: ['/draak_socials.png'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${school.name} | ${school.tagline}`,
+      description: school.description,
+      images: ['/draak_socials.png'],
+    },
+    icons: { icon: '/draak_socials.png', apple: '/draak_socials.png' },
+    robots: { index: true, follow: true },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: '#f1f4f8',

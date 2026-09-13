@@ -31,7 +31,7 @@ Only these are read by the **running site**:
 | --- | --- | --- |
 | `DATABASE_URL` | always | Neon's **pooled** string (host contains `-pooler`). The Neon integration usually sets this for you — open it and confirm it is the pooled one. |
 | `SESSION_SECRET` | always | `openssl rand -base64 48`. Changing it later logs everyone out. |
-| `NEXT_PUBLIC_SITE_URL` | always | The address this deployment answers on, no trailing slash. It grants nobody access and points no domain anywhere — see below. While testing, set it to the `*.vercel.app` address. |
+| `NEXT_PUBLIC_SITE_URL` | leave unset | Only needed to override the address the app derives from each request. See below — normally there is nothing to set here. |
 | `SITE_ACCESS_CODE` | while testing | Puts the whole site behind a password prompt and marks it noindex. Remove it to go public. |
 | `FIREBASE_HASH_SIGNER_KEY` | after the Firebase import | Without it, migrated parents are told their correct password is wrong. See `docs/MIGRATION.md`. |
 | `FIREBASE_HASH_SALT_SEPARATOR` | after the Firebase import | |
@@ -58,23 +58,25 @@ confirm with the health check in step 4.
 
 ### What `NEXT_PUBLIC_SITE_URL` is, and is not
 
-It is a string the app uses to build absolute URLs it cannot work out from an
-incoming request. Five places use it:
+**Leave it unset. That is the normal, permanent setting** — not a placeholder
+you fill in before going live.
 
-- the link inside a password-reset email
-- `metadataBase`, so Open Graph and canonical tags resolve
-- `/sitemap.xml` and the `Sitemap:` line in `/robots.txt`
-- the structured data on `/contact`
+The app needs an absolute URL in five places (the link inside a password-reset
+email, `metadataBase` for Open Graph and canonical tags, `/sitemap.xml`, the
+`Sitemap:` line in `/robots.txt`, and the structured data on `/contact`). It gets
+one by reading the `Host` header off the actual incoming request
+(`src/lib/site-url.ts`), so it is automatically correct on whatever address is
+serving it: a preview URL, the `*.vercel.app` production URL, or a custom domain
+later — with no code change and no environment variable to update when the
+address changes. This is also why the codebase names no domain anywhere: there
+is nothing to name.
 
-That is all. **It does not publish anything, grant anyone access, or point a
-domain at this deployment.** Setting it to `https://www.sintjorisschool.be` does
-not make that address serve this site; only DNS does, and the school's domain
-keeps serving the old FlutterFlow site until you change it.
-
-The one thing a wrong value really breaks: password-reset emails. Leave it on the
-school's domain while testing and every reset link sends the tester to the *old
-live site*. So during testing, set it to the `*.vercel.app` address, and change it
-at go-live.
+`NEXT_PUBLIC_SITE_URL` exists only to override that, for the unusual case where a
+proxy in front of the deployment strips the standard forwarded-host headers. It
+does not publish anything, grant anyone access, or point a domain at this
+deployment — only DNS does that. If you ever do set it, point it at wherever this
+deployment actually answers; pointing it anywhere else sends password-reset links
+to the wrong place, which is the one thing a wrong value here actually breaks.
 
 ### What actually makes the site visible
 
@@ -112,10 +114,25 @@ robots.txt and the sitemap go back to normal on their own.
 > Changing an environment variable in Vercel does not affect the running
 > deployment until you redeploy. Vercel → Deployments → ⋯ → Redeploy.
 
-Vercel also has its own Deployment Protection under Settings → Deployment
-Protection. Use it too if your plan offers it for production deployments; the two
-are independent and do not conflict. `SITE_ACCESS_CODE` works on any plan and
-lives with the code, so it is the one this repository ships.
+### Vercel's own Deployment Protection
+
+`SITE_ACCESS_CODE` lives in the code and works on any Vercel plan, which is why
+this repository ships it. Vercel also has its own protection, under
+**Settings → Deployment Protection**, and the two stack without conflicting —
+use both if your plan offers it:
+
+- **Vercel Authentication.** Requires the visitor to sign in with a Vercel
+  account that has access to the project. Strongest option, but a school
+  contact who is not a Vercel user cannot get in at all, even with the right
+  link — not a fit for testers outside your own team.
+- **Password Protection.** One shared password for the deployment, no Vercel
+  account needed. The closest Vercel equivalent to `SITE_ACCESS_CODE`.
+  **Requires a paid plan** — not available on Hobby.
+
+I have no access to your Vercel account or its API from this session, so I
+cannot turn either of these on for you — set them from the dashboard if your
+plan includes them. If you are on Vercel's free Hobby plan, neither is
+available, and `SITE_ACCESS_CODE` is the whole answer, not a fallback.
 
 ### Two more ways a test can leak
 
@@ -237,9 +254,10 @@ builds would race each other. Schema changes are rare enough to run deliberately
 `npm run db:generate` after editing `db/schema.ts`, commit the SQL, then
 `npm run db:apply` against Neon.
 
-**Going public is one variable.** Remove `SITE_ACCESS_CODE`, redeploy, attach the
-school's domain, and set `NEXT_PUBLIC_SITE_URL` to it in the same change so
-password-reset links point at the right host from the first minute.
+**Going public is removing one variable.** Remove `SITE_ACCESS_CODE`, redeploy,
+and attach the school's domain in Vercel. `NEXT_PUBLIC_SITE_URL` needs no change
+either way — password-reset links, the sitemap and the Open Graph tags pick up
+the new domain from the request as soon as it starts serving traffic.
 
 **Functions run in `fra1`.** `vercel.json` pins the region to Frankfurt because
 the Neon project is in `eu-central-1`. Leaving it on a US default would send every

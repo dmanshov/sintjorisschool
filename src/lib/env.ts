@@ -25,9 +25,6 @@ export const env = {
   get sessionSecret() {
     return required('SESSION_SECRET');
   },
-  get siteUrl() {
-    return optional('NEXT_PUBLIC_SITE_URL') ?? 'http://localhost:3000';
-  },
 
   /**
    * Firebase's password-hash parameters. Present only while legacy hashes remain.

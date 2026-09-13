@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { env } from '@/lib/env';
+import { getSiteOrigin } from '@/lib/site-url';
 import { passwordResetMail, sendMail, welcomeMail } from '@/lib/mail';
 import { passwordResetTokens, users } from '@db/schema';
 import {
@@ -207,7 +207,8 @@ export async function requestPasswordResetAction(
       userId: user.id,
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
     });
-    const url = `${env.siteUrl}/wachtwoord-herstellen?token=${encodeURIComponent(token)}`;
+    const origin = await getSiteOrigin();
+    const url = `${origin}/wachtwoord-herstellen?token=${encodeURIComponent(token)}`;
     await sendMail(passwordResetMail(user.email, url));
   }
 
