@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
+import { safeRead, type DbFailure } from '@/lib/db-status';
 import { content, type Content } from '@db/schema';
 
 export const CONTENT_ID = 'singleton';
@@ -69,3 +70,64 @@ export const CONTENT_FIELDS = {
 
 export type ContentField = keyof typeof CONTENT_FIELDS;
 export const CONTENT_FIELD_NAMES = Object.keys(CONTENT_FIELDS) as ContentField[];
+
+/**
+ * Every content field empty. Used when the database cannot answer, so the public
+ * pages still render their built-in copy instead of returning a 500 — each
+ * <CmsText> on those pages already carries a `fallback`.
+ *
+ * Written out in full rather than built dynamically, so that adding a column to
+ * `content` without adding it here is a compile error rather than a surprise at
+ * runtime.
+ */
+function emptyContent(): Content {
+  return {
+    id: CONTENT_ID,
+    maaltijd: [],
+    maaltijdDatums: [],
+    welkom: null,
+    inschrijvingen: null,
+    schoolreglement: null,
+    teamFoto: null,
+    teamDirecteur: null,
+    teamAdministratie: null,
+    teamKleuterschool: null,
+    teamLagereSchool: null,
+    teamAmbulant: null,
+    teamZorg: null,
+    teamGym: null,
+    teamOnderhoud: null,
+    bestuurVoorzitter: null,
+    bestuurLeden: null,
+    clbCoordinator: null,
+    clbMedewerkers: null,
+    ondersteuningVestiging: null,
+    ondersteuningVoorwaarden: null,
+    opvang: null,
+    ziekte: null,
+    maaltijdMaand: null,
+    maaltijdBericht: null,
+    benodigdhedenKK0: null,
+    benodigdhedenKK1: null,
+    benodigdhedenKK2: null,
+    benodigdhedenKK3: null,
+    benodigdhedenL1: null,
+    benodigdhedenL2: null,
+    benodigdhedenL3: null,
+    benodigdhedenL4: null,
+    benodigdhedenL5: null,
+    benodigdhedenL6: null,
+    updatedAt: new Date(0),
+    updatedById: null,
+  };
+}
+
+/**
+ * The editable text, or blank content plus a reason when the database is not
+ * reachable or not yet migrated. Public pages use this; anything behind a login
+ * uses `getContent` and is allowed to fail loudly.
+ */
+export async function getContentSafe(): Promise<{ content: Content; failure: DbFailure }> {
+  const { value, failure } = await safeRead('content', getContent, emptyContent());
+  return { content: value, failure };
+}

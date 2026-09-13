@@ -3,14 +3,24 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { DbNotice } from '@/components/db-notice';
 import { Card, CmsText, Disclosure, DocumentLink, PageHeader, Section, TabNav } from '@/components/layout';
 import { getViewer } from '@/lib/auth/session';
-import { getContent } from '@/lib/data/content';
+import { getContentSafe } from '@/lib/data/content';
 import { documents, school } from '@/lib/site';
 import { praktischCopy } from '@/lib/copy';
 import { CLASSROOMS } from '@db/schema';
 
-export const revalidate = 600;
+/**
+ * Rendered per request, never prerendered at build time.
+ *
+ * The header shows whether you are logged in, so it reads the session cookie and
+ * every page is dynamic regardless. Saying so explicitly matters for deployment:
+ * without it Next attempts a build-time prerender, which opens a database
+ * connection, and the build then fails on any host where the database is not yet
+ * migrated or is cold-starting. A build should not depend on a running database.
+ */
+export const dynamic = 'force-dynamic';
 
 const TABS = [
   { key: 'Info', label: 'Info' },
@@ -55,13 +65,15 @@ export default async function PraktischPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const tab = resolveTab(await searchParams);
-  const content = await getContent();
+  const { content, failure } = await getContentSafe();
   const viewer = await getViewer();
   const menuUrl = content.maaltijd.at(-1) ?? null;
 
   return (
     <>
       <SiteHeader current="/praktisch" />
+
+      <DbNotice failure={failure} />
 
       <main id="inhoud">
         <PageHeader

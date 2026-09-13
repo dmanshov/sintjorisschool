@@ -2,13 +2,23 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { DbNotice } from '@/components/db-notice';
 import { Card, PageHeader, Section } from '@/components/layout';
 import { PostCard } from '@/components/post-card';
 import { getViewer } from '@/lib/auth/session';
-import { countPosts, listPosts } from '@/lib/data/posts';
+import { countPostsSafe, listPostsSafe } from '@/lib/data/posts';
 import { POST_CLASSROOMS } from '@db/schema';
 
-export const revalidate = 120;
+/**
+ * Rendered per request, never prerendered at build time.
+ *
+ * The header shows whether you are logged in, so it reads the session cookie and
+ * every page is dynamic regardless. Saying so explicitly matters for deployment:
+ * without it Next attempts a build-time prerender, which opens a database
+ * connection, and the build then fails on any host where the database is not yet
+ * migrated or is cold-starting. A build should not depend on a running database.
+ */
+export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 12;
 
@@ -32,14 +42,14 @@ export default async function SchoolkrantPage({
   const page = Math.max(1, Number(Array.isArray(params.p) ? params.p[0] : params.p) || 1);
 
   const classrooms = klas ? [klas] : undefined;
-  const [posts, total] = await Promise.all([
-    listPosts({
+  const [{ posts, failure }, total] = await Promise.all([
+    listPostsSafe({
       classrooms,
       limit: PAGE_SIZE,
       offset: (page - 1) * PAGE_SIZE,
       viewerId: viewer?.user.id ?? null,
     }),
-    countPosts(classrooms),
+    countPostsSafe(classrooms),
   ]);
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -48,6 +58,8 @@ export default async function SchoolkrantPage({
   return (
     <>
       <SiteHeader current="/schoolkrant" />
+
+      <DbNotice failure={failure} />
 
       <main id="inhoud">
         <PageHeader

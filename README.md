@@ -105,9 +105,16 @@ the school's address, phone numbers and teacher mailboxes live in
 
 ## Deploying
 
-Any host that runs Next.js works. On Vercel: connect the repository, set the
-environment variables from `.env.example`, and point `DATABASE_URL` at Neon's
-**pooled** connection string (the one with `-pooler` in the host).
+**[`docs/DEPLOY.md`](docs/DEPLOY.md) is the step-by-step version.** Short form:
+push to `main`, which Vercel deploys automatically; set `DATABASE_URL`,
+`SESSION_SECRET` and `NEXT_PUBLIC_SITE_URL` in the Vercel project; then run
+`npm run db:apply` once against the Neon database, or the site comes up empty.
+
+Check `/api/health` after any deploy — it reports whether the database is
+reachable and whether the schema has been applied, without revealing the host.
+
+Any host that runs Next.js works. Point `DATABASE_URL` at Neon's **pooled**
+connection string (the one with `-pooler` in the host).
 
 This site belongs in **its own Neon project**, not a second database inside a
 project shared with another application — databases in one project share the

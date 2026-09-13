@@ -2,11 +2,21 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { DbNotice } from '@/components/db-notice';
 import { Card, CmsText, DocumentLink, PageHeader, Section } from '@/components/layout';
-import { getContent } from '@/lib/data/content';
+import { getContentSafe } from '@/lib/data/content';
 import { documents, school } from '@/lib/site';
 
-export const revalidate = 600;
+/**
+ * Rendered per request, never prerendered at build time.
+ *
+ * The header shows whether you are logged in, so it reads the session cookie and
+ * every page is dynamic regardless. Saying so explicitly matters for deployment:
+ * without it Next attempts a build-time prerender, which opens a database
+ * connection, and the build then fails on any host where the database is not yet
+ * migrated or is cold-starting. A build should not depend on a running database.
+ */
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Inschrijven',
@@ -15,11 +25,13 @@ export const metadata: Metadata = {
 };
 
 export default async function InschrijvenPage() {
-  const content = await getContent();
+  const { content, failure } = await getContentSafe();
 
   return (
     <>
       <SiteHeader />
+
+      <DbNotice failure={failure} />
 
       <main id="inhoud">
         <PageHeader

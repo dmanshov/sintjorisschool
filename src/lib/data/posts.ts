@@ -1,5 +1,6 @@
 import { and, arrayOverlaps, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
+import { safeRead, type DbFailure } from '@/lib/db-status';
 import { postLikes, posts, users } from '@db/schema';
 
 export type PostWithMeta = {
@@ -85,4 +86,21 @@ export async function getPost(id: string, viewerId: string | null = null): Promi
     .where(eq(posts.id, id))
     .limit(1);
   return rows[0] ?? null;
+}
+
+/**
+ * Articles, or an empty list plus a reason when the database cannot answer. The
+ * page then shows its "no articles" state rather than a 500 — a school's address
+ * and opening hours should stay readable even when the news feed cannot load.
+ */
+export async function listPostsSafe(
+  options: ListPostsOptions = {},
+): Promise<{ posts: PostWithMeta[]; failure: DbFailure }> {
+  const { value, failure } = await safeRead('posts', () => listPosts(options), []);
+  return { posts: value, failure };
+}
+
+export async function countPostsSafe(classrooms?: string[]): Promise<number> {
+  const { value } = await safeRead('posts count', () => countPosts(classrooms), 0);
+  return value;
 }

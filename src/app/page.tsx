@@ -4,10 +4,12 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { Card, CmsText, Section } from '@/components/layout';
 import { PostCard } from '@/components/post-card';
+import { DbNotice } from '@/components/db-notice';
 import { getViewer } from '@/lib/auth/session';
-import { getContent } from '@/lib/data/content';
+import { getContentSafe } from '@/lib/data/content';
 import { classroomsForParent } from '@/lib/data/children';
-import { listPosts } from '@/lib/data/posts';
+import { safeRead } from '@/lib/db-status';
+import { listPostsSafe } from '@/lib/data/posts';
 import { school } from '@/lib/site';
 
 /**
@@ -15,16 +17,27 @@ import { school } from '@/lib/site';
  * for signed-in parents, differing only in which posts they listed. One page
  * that adapts is the same site with half the code.
  */
-export const revalidate = 300;
+/**
+ * Rendered per request, never prerendered at build time.
+ *
+ * The header shows whether you are logged in, so it reads the session cookie and
+ * every page is dynamic regardless. Saying so explicitly matters for deployment:
+ * without it Next attempts a build-time prerender, which opens a database
+ * connection, and the build then fails on any host where the database is not yet
+ * migrated or is cold-starting. A build should not depend on a running database.
+ */
+export const dynamic = 'force-dynamic';
 
 export default async function WelkomPage() {
   const viewer = await getViewer();
-  const content = await getContent();
+  const { content, failure } = await getContentSafe();
 
   // Signed-in parents see the pinned articles for their own children's classes
   // first; visitors see the pinned articles that were published school-wide.
-  const classrooms = viewer ? await classroomsForParent(viewer.user.id) : [];
-  const pinned = await listPosts({
+  const classrooms = viewer
+    ? (await safeRead('classrooms', () => classroomsForParent(viewer.user.id), [] as string[])).value
+    : [];
+  const { posts: pinned } = await listPostsSafe({
     pinnedOnly: true,
     limit: 6,
     viewerId: viewer?.user.id ?? null,
@@ -34,11 +47,13 @@ export default async function WelkomPage() {
   const posts =
     pinned.length > 0
       ? pinned
-      : await listPosts({ pinnedOnly: true, limit: 6, viewerId: viewer?.user.id ?? null });
+      : (await listPostsSafe({ pinnedOnly: true, limit: 6, viewerId: viewer?.user.id ?? null })).posts;
 
   return (
     <>
       <SiteHeader current="/" />
+
+      <DbNotice failure={failure} />
 
       <main id="inhoud">
         {/* Hero */}
