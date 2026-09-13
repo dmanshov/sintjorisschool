@@ -31,7 +31,8 @@ Only these are read by the **running site**:
 | --- | --- | --- |
 | `DATABASE_URL` | always | Neon's **pooled** string (host contains `-pooler`). The Neon integration usually sets this for you — open it and confirm it is the pooled one. |
 | `SESSION_SECRET` | always | `openssl rand -base64 48`. Changing it later logs everyone out. |
-| `NEXT_PUBLIC_SITE_URL` | always | The public URL, no trailing slash. Password-reset links are built from it, so a wrong value sends parents to the wrong host. |
+| `NEXT_PUBLIC_SITE_URL` | always | The address this deployment answers on, no trailing slash. It grants nobody access and points no domain anywhere — see below. While testing, set it to the `*.vercel.app` address. |
+| `SITE_ACCESS_CODE` | while testing | Puts the whole site behind a password prompt and marks it noindex. Remove it to go public. |
 | `FIREBASE_HASH_SIGNER_KEY` | after the Firebase import | Without it, migrated parents are told their correct password is wrong. See `docs/MIGRATION.md`. |
 | `FIREBASE_HASH_SALT_SEPARATOR` | after the Firebase import | |
 | `FIREBASE_HASH_ROUNDS` | after the Firebase import | Usually `8`. |
@@ -50,6 +51,80 @@ A `DATABASE_URL` defined at Vercel **team** level is inherited by new projects. 
 another application defined one there, this deployment silently uses it. Set the
 variable on *this project* and check that nothing shared overrides it — then
 confirm with the health check in step 4.
+
+---
+
+## 2b. Keep it private while you finish it
+
+### What `NEXT_PUBLIC_SITE_URL` is, and is not
+
+It is a string the app uses to build absolute URLs it cannot work out from an
+incoming request. Five places use it:
+
+- the link inside a password-reset email
+- `metadataBase`, so Open Graph and canonical tags resolve
+- `/sitemap.xml` and the `Sitemap:` line in `/robots.txt`
+- the structured data on `/contact`
+
+That is all. **It does not publish anything, grant anyone access, or point a
+domain at this deployment.** Setting it to `https://www.sintjorisschool.be` does
+not make that address serve this site; only DNS does, and the school's domain
+keeps serving the old FlutterFlow site until you change it.
+
+The one thing a wrong value really breaks: password-reset emails. Leave it on the
+school's domain while testing and every reset link sends the tester to the *old
+live site*. So during testing, set it to the `*.vercel.app` address, and change it
+at go-live.
+
+### What actually makes the site visible
+
+Two things, and neither is an environment variable:
+
+1. **A custom domain attached in Vercel**, plus the DNS record pointing at it.
+   Until you do that, the school's address is untouched.
+2. **The `*.vercel.app` address itself**, which is public. A Vercel *production*
+   deployment is reachable there by anyone who has the link, and unlike a preview
+   deployment it is not automatically marked `noindex` — so a crawler that finds
+   it can index your unfinished site, and that page can later compete with the
+   school's real domain for the same content.
+
+"Nobody knows the URL" is not access control. So:
+
+### The staging lock
+
+Set one variable in Vercel and redeploy:
+
+```
+SITE_ACCESS_CODE=<a passphrase you choose>
+```
+
+The entire site — pages, images, PDFs, sitemap, robots.txt — then answers `401`
+with a browser password prompt. Any username works; the passphrase is the
+password. Everything served carries `X-Robots-Tag: noindex, nofollow, noarchive`,
+and `/robots.txt` becomes a flat `Disallow: /`.
+
+`/api/health` stays open on purpose, so you can check a deploy without a browser.
+It reveals no hostname, credentials or data.
+
+To go public: **delete the variable and redeploy.** Nothing else changes, and
+robots.txt and the sitemap go back to normal on their own.
+
+> Changing an environment variable in Vercel does not affect the running
+> deployment until you redeploy. Vercel → Deployments → ⋯ → Redeploy.
+
+Vercel also has its own Deployment Protection under Settings → Deployment
+Protection. Use it too if your plan offers it for production deployments; the two
+are independent and do not conflict. `SITE_ACCESS_CODE` works on any plan and
+lives with the code, so it is the one this repository ships.
+
+### Two more ways a test can leak
+
+- **Email.** Keep `MAIL_DRIVER=console` while testing. If you configure SMTP and
+  then import the real Firebase accounts, a password-reset test can send a real
+  email to a real parent about a site they have never heard of.
+- **The old site.** It stays live and fully functional throughout, and it keeps
+  its wide-open Firestore rules until you replace them. That is unrelated to this
+  deployment and still needs doing — see `docs/MIGRATION.md`.
 
 ---
 
@@ -161,6 +236,10 @@ command would make deploys depend on the database again, and two concurrent
 builds would race each other. Schema changes are rare enough to run deliberately:
 `npm run db:generate` after editing `db/schema.ts`, commit the SQL, then
 `npm run db:apply` against Neon.
+
+**Going public is one variable.** Remove `SITE_ACCESS_CODE`, redeploy, attach the
+school's domain, and set `NEXT_PUBLIC_SITE_URL` to it in the same change so
+password-reset links point at the right host from the first minute.
 
 **Functions run in `fra1`.** `vercel.json` pins the region to Frankfurt because
 the Neon project is in `eu-central-1`. Leaving it on a US default would send every

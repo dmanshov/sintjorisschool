@@ -113,6 +113,11 @@ push to `main`, which Vercel deploys automatically; set `DATABASE_URL`,
 Check `/api/health` after any deploy — it reports whether the database is
 reachable and whether the schema has been applied, without revealing the host.
 
+**While the site is still being finished, set `SITE_ACCESS_CODE`.** It puts the
+whole deployment behind a password prompt and marks it `noindex`, so a Vercel URL
+that anyone could otherwise open (and Google could index) stays private. Delete
+the variable and redeploy to go public.
+
 Any host that runs Next.js works. Point `DATABASE_URL` at Neon's **pooled**
 connection string (the one with `-pooler` in the host).
 

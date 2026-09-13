@@ -5,7 +5,19 @@ import type { MetadataRoute } from 'next';
  * listed at its canonical (original) URL, so nothing the school has already shared
  * or that Google has already indexed changes.
  */
+/**
+ * Evaluated per request, not at build time.
+ *
+ * Otherwise the staging lock's disallow-all would be baked in at build and go
+ * stale: turning SITE_ACCESS_CODE on or off would not change robots.txt until
+ * the next deploy, which is exactly when you least want a stale answer.
+ */
+export const dynamic = 'force-dynamic';
+
 export default function sitemap(): MetadataRoute.Sitemap {
+  // While the staging lock is on there is nothing public to list.
+  if (process.env.SITE_ACCESS_CODE) return [];
+
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.sintjorisschool.be';
   const now = new Date();
 
